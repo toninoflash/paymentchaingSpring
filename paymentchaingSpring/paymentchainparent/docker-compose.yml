@@ -1,0 +1,126 @@
+## YAML Template.
+---
+services:
+  registry-discovery:
+    container_name: id-eureka
+    image: eurekaserver_image:0.0.1-SNAPSHOT
+    ports:
+      - 8761:8761
+    environment:
+      - JAVA_OPTS=
+         -Xms256M 
+         -Xmx256M 
+
+  product:
+    container_name: bd-product
+    image: product_image:0.0.1-SNAPSHOT
+    environment:
+       - EUREKA_SERVER=http://registry-discovery:8761/eureka/
+       - JAVA_OPTS=
+         -Xms256M 
+         -Xmx256M
+         -EUREKA_SERVER=http://registry-discovery:8761/eureka/
+    depends_on:
+      - registry-discovery
+    ports:
+      - 8081:8081
+
+  customer:
+    container_name: bd-customer
+    image: customer_image:0.0.1-SNAPSHOT   
+    environment:
+      - EUREKA_SERVER=http://registry-discovery:8761/eureka/
+      - JAVA_OPTS=
+         -Xms256M 
+         -Xmx256M
+
+    depends_on:
+      - registry-discovery
+    ports:
+      - 8080:8080
+
+  configserver:
+    container_name: bd-configserver
+    image: configserver_image:0.0.1-SNAPSHOT
+    environment:
+      - EUREKA_SERVER=http://registry-discovery:8761/eureka/
+      - JAVA_OPTS=
+         -Xms256M 
+         -Xmx256M
+         -DREPOSITORY_PATH=/repo
+    volumes:
+      - /d/Proyectos/SpringBoot/paymentchainparent/config-server-repo:/repo
+    depends_on:
+      - registry-discovery
+    ports:
+      - 8888:8888
+
+  admin_image:
+    container_name: bd-admin_image
+    image: admin_image:0.0.1-SNAPSHOT   
+    environment:
+      - EUREKA_SERVER=http://registry-discovery:8761/eureka/
+      - JAVA_OPTS=
+         -Xms256M 
+         -Xmx256M
+
+    depends_on:
+      - registry-discovery
+    ports:
+      - 8062:8062
+
+  invoice_image:
+    container_name: bd-invoice_image
+    image: invoice_image:0.0.1-SNAPSHOT   
+    environment:
+      - EUREKA_SERVER=http://registry-discovery:8761/eureka/
+      - JAVA_OPTS=
+         -Xms256M 
+         -Xmx256M
+
+    depends_on:
+      - registry-discovery
+    ports:
+      - 8084:8084
+
+  transaction_image:
+    container_name: bd-transaction_image
+    image: transaction_image:0.0.1-SNAPSHOT   
+    environment:
+      - EUREKA_SERVER=http://registry-discovery:8761/eureka/
+      - JAVA_OPTS=
+         -Xms256M 
+         -Xmx256M
+
+    depends_on:
+      - registry-discovery
+    ports:
+      - 8082:8082
+      
+  postgres_db:
+    container_name: postgres
+    image: postgres:latest
+    ports:
+        - 5432:5432
+    volumes:
+        - ./dbfiles:/docker-entrypoint-initdb.d
+        - ./postgres_data:/var/lib/postgresql/data
+    environment:
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: qwerty
+        POSTGRES_DB: postgres
+
+
+  pgadmin4:
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "admin@admin.com"
+      PGADMIN_DEFAULT_PASSWORD: "qwerty"
+    ports:
+      - 80:80
+    depends_on:
+      - postgres_db
+
+
+
