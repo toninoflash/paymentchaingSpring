@@ -37,7 +37,6 @@ services:
     depends_on:
       - registry-discovery
     ports:
-      - 8080:8080
 
   configserver:
     container_name: bd-configserver
@@ -68,6 +67,21 @@ services:
       - registry-discovery
     ports:
       - 8062:8062
+
+    apigateway_image:
+        container_name: id_apigateway_image
+        image: apigateway_image:0.0.1-SNAPSHOT   
+        environment:
+          - EUREKA_SERVER=http://registry-discovery:8761/eureka/
+          - JAVA_OPTS=
+             -Xms256M 
+             -Xmx256M
+
+        depends_on:
+          - registry-discovery
+        ports:
+          - 8062:8062
+
 
   invoice_image:
     container_name: bd-invoice_image
